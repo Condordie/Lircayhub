@@ -34,7 +34,7 @@ class AppTheme {
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: Colors.white,
-        indicatorColor: AppColors.moss.withOpacity(0.35),
+        indicatorColor: AppColors.moss.withAlpha(90),
       ),
     );
   }

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import 'core/data/mock_data.dart';
+import 'core/services/haptic_service.dart';
+import 'core/services/notification_service.dart';
+import 'core/services/voice_service.dart';
+import 'ui/screens/home_screen.dart';
 import 'ui/theme/app_theme.dart';
 
 void main() {
@@ -12,37 +16,22 @@ class LircayHubApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Lircay Trail',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
-      home: const _PlaceholderHome(),
-    );
-  }
-}
-
-/// Pantalla temporal para verificar que enums, modelos, datos y tema
-/// compilan bien. Se reemplaza por el onboarding y el Home en la fase 2.
-class _PlaceholderHome extends StatelessWidget {
-  const _PlaceholderHome();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Lircay Trail')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          for (final trail in MockData.trails)
-            Card(
-              child: ListTile(
-                title: Text(trail.name),
-                subtitle: Text(
-                  '${trail.difficulty.label} · ${trail.distanceKm} km · ${trail.durationLabel}',
-                ),
-              ),
-            ),
-        ],
+    return MultiProvider(
+      providers: [
+        Provider<HapticService>(create: (_) => HapticService()),
+        Provider<VoiceService>(
+          create: (_) => VoiceService(),
+          dispose: (_, service) => service.dispose(),
+        ),
+        ChangeNotifierProvider<NotificationService>(
+          create: (_) => NotificationService(),
+        ),
+      ],
+      child: MaterialApp(
+        title: 'Lircay Trail',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light,
+        home: const HomeScreen(),
       ),
     );
   }
