@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../core/constants/app_assets.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
+import 'app_icon.dart';
 
 /// Botón de emergencia: hay que mantenerlo presionado para evitar toques accidentales.
 class SosButton extends StatefulWidget {
@@ -65,13 +67,22 @@ class _SosButtonState extends State<SosButton>
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
-                    child: const Text(
-                      'SOS',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                      ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const AppIcon(
+                          AppAssets.icSos,
+                          size: 26,
+                          color: Colors.white,
+                        ),
+                        Text(
+                          'SOS',
+                          style: AppTextStyles.extraBold.copyWith(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   SizedBox(

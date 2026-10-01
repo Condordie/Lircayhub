@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../models/trail_alert.dart';
+import '../theme/app_text_styles.dart';
 import '../theme/enum_visuals.dart';
+import 'app_icon.dart';
 
 class AlertTile extends StatelessWidget {
   const AlertTile({super.key, required this.alert, this.onDismiss});
@@ -22,12 +24,9 @@ class AlertTile extends StatelessWidget {
         isThreeLine: true,
         leading: CircleAvatar(
           backgroundColor: color.withAlpha(35),
-          child: Icon(alert.type.icon, color: color),
+          child: AppIcon(alert.type.iconAsset, size: 22, color: color),
         ),
-        title: Text(
-          alert.title,
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
+        title: Text(alert.title, style: AppTextStyles.semiBold),
         subtitle: Text('${alert.message}\n${alert.type.label} · $_hhmm'),
         trailing: onDismiss == null
             ? null

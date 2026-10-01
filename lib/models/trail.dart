@@ -11,6 +11,7 @@ class Trail {
     required this.distanceKm,
     required this.elevationGainM,
     required this.durationMinutes,
+    required this.imageAsset,
     required this.waypoints,
     this.highlights = const [],
   });
@@ -23,6 +24,9 @@ class Trail {
   final double distanceKm;
   final int elevationGainM;
   final int durationMinutes;
+
+  /// Ruta del asset de la foto (ver AppAssets).
+  final String imageAsset;
   final List<Waypoint> waypoints;
   final List<String> highlights;
 

@@ -4,6 +4,7 @@ import '../../core/enums/nav_cue.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../theme/enum_visuals.dart';
+import 'app_icon.dart';
 
 /// Indicación grande de navegación; se vuelve roja cuando hay desvío.
 class NavCueBanner extends StatelessWidget {
@@ -24,7 +25,7 @@ class NavCueBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(cue.icon, color: Colors.white, size: 52),
+          AppIcon(cue.iconAsset, size: 52, color: Colors.white),
           const SizedBox(width: 16),
           Expanded(
             child: Column(

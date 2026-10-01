@@ -318,9 +318,8 @@ class _FallOverlay extends StatelessWidget {
                 const SizedBox(height: 12),
                 Text(
                   '${vm.fallCountdown}',
-                  style: const TextStyle(
+                  style: AppTextStyles.extraBold.copyWith(
                     fontSize: 64,
-                    fontWeight: FontWeight.w800,
                     color: AppColors.danger,
                   ),
                 ),

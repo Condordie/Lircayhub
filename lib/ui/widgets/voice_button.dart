@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../core/constants/app_assets.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
+import 'app_icon.dart';
 
 class VoiceButton extends StatelessWidget {
   const VoiceButton({
@@ -24,13 +26,11 @@ class VoiceButton extends StatelessWidget {
           child: InkWell(
             customBorder: const CircleBorder(),
             onTap: onPressed,
-            child: SizedBox(
+            child: const SizedBox(
               width: 76,
               height: 76,
-              child: Icon(
-                isListening ? Icons.hearing : Icons.mic,
-                color: Colors.white,
-                size: 34,
+              child: Center(
+                child: AppIcon(AppAssets.icVoz, size: 34, color: Colors.white),
               ),
             ),
           ),

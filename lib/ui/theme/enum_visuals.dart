@@ -1,35 +1,42 @@
 import 'package:flutter/material.dart';
 
+import '../../core/constants/app_assets.dart';
 import '../../core/enums/alert_type.dart';
 import '../../core/enums/nav_cue.dart';
 import '../../core/enums/trail_difficulty.dart';
 import 'app_colors.dart';
 
-/// Íconos y colores de los enums. Se mantienen aquí para que core/ no dependa de Material.
+/// Íconos (SVG) y colores de los enums. Se mantienen aquí para que core/ no dependa de Material.
 extension TrailDifficultyVisuals on TrailDifficulty {
   Color get color => switch (this) {
         TrailDifficulty.easy => const Color(0xFF3E8E5A),
         TrailDifficulty.moderate => AppColors.sunset,
         TrailDifficulty.hard => AppColors.danger,
       };
+
+  String get iconAsset => switch (this) {
+        TrailDifficulty.easy => AppAssets.icDificultadFacil,
+        TrailDifficulty.moderate => AppAssets.icDificultadFacil,
+        TrailDifficulty.hard => AppAssets.icDificultadDificil,
+      };
 }
 
 extension NavCueVisuals on NavCue {
-  IconData get icon => switch (this) {
-        NavCue.straight => Icons.arrow_upward,
-        NavCue.turnLeft => Icons.turn_left,
-        NavCue.turnRight => Icons.turn_right,
-        NavCue.offTrail => Icons.warning_amber_rounded,
-        NavCue.arrived => Icons.flag,
+  String get iconAsset => switch (this) {
+        NavCue.straight => AppAssets.icRecto,
+        NavCue.turnLeft => AppAssets.icGiroIzquierda,
+        NavCue.turnRight => AppAssets.icGiroDerecha,
+        NavCue.offTrail => AppAssets.icDesvio,
+        NavCue.arrived => AppAssets.icLlegada,
       };
 }
 
 extension AlertTypeVisuals on AlertType {
-  IconData get icon => switch (this) {
-        AlertType.weather => Icons.cloud_outlined,
-        AlertType.trailClosure => Icons.block,
-        AlertType.returnDeadline => Icons.schedule,
-        AlertType.fallDetected => Icons.warning_amber_rounded,
+  String get iconAsset => switch (this) {
+        AlertType.weather => AppAssets.icClima,
+        AlertType.trailClosure => AppAssets.icDesvio,
+        AlertType.returnDeadline => AppAssets.icLlegada,
+        AlertType.fallDetected => AppAssets.icDesvio,
       };
 
   Color get color => switch (this) {

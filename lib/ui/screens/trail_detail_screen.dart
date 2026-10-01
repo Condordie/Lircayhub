@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/constants/app_assets.dart';
 import '../../core/enums/nav_cue.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/services/voice_service.dart';
+import '../../core/utils/formatters.dart';
 import '../../models/trail.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../theme/enum_visuals.dart';
+import '../widgets/app_icon.dart';
 import '../widgets/difficulty_chip.dart';
 import '../widgets/section_header.dart';
 import '../widgets/stat_tile.dart';
+import '../widgets/trail_image.dart';
 import '../widgets/trail_map_preview.dart';
 import 'active_hike_screen.dart';
 
@@ -55,7 +59,17 @@ class TrailDetailScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          TrailMapPreview(waypoints: trail.waypoints, height: 200),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Hero(
+              tag: 'trail-image-${trail.id}',
+              child: TrailImage(
+                asset: trail.imageAsset,
+                height: 220,
+                semanticLabel: trail.name,
+              ),
+            ),
+          ),
           const SizedBox(height: 16),
           Row(
             children: [
@@ -74,12 +88,12 @@ class TrailDetailScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   StatTile(
-                    icon: Icons.straighten,
-                    value: '${trail.distanceKm} km',
+                    svgAsset: AppAssets.icDistancia,
+                    value: '${formatKm(trail.distanceKm)} km',
                     label: 'Distancia',
                   ),
                   StatTile(
-                    icon: Icons.trending_up,
+                    svgAsset: AppAssets.icDesnivel,
                     value: '${trail.elevationGainM} m',
                     label: 'Desnivel',
                   ),
@@ -104,6 +118,13 @@ class TrailDetailScreen extends StatelessWidget {
               ],
             ),
           ],
+          const SectionHeader(title: 'Recorrido esquemático'),
+          TrailMapPreview(waypoints: trail.waypoints, height: 200),
+          const SizedBox(height: 6),
+          const Text(
+            'Esquema ilustrativo del trayecto, no es un mapa GPS.',
+            style: AppTextStyles.caption,
+          ),
           const SectionHeader(title: 'Puntos del recorrido'),
           for (final wp in trail.waypoints)
             ListTile(
@@ -112,8 +133,8 @@ class TrailDetailScreen extends StatelessWidget {
               leading: CircleAvatar(
                 radius: 16,
                 backgroundColor: AppColors.moss.withAlpha(70),
-                child: Icon(
-                  wp.cue.icon,
+                child: AppIcon(
+                  wp.cue.iconAsset,
                   size: 18,
                   color: AppColors.forestDark,
                 ),
@@ -121,14 +142,27 @@ class TrailDetailScreen extends StatelessWidget {
               title: Text(wp.name),
               subtitle: Text(wp.cue.label),
               trailing: Text(
-                '${wp.distanceFromStartKm.toStringAsFixed(1)} km',
+                '${formatKm(wp.distanceFromStartKm)} km',
                 style: AppTextStyles.caption,
               ),
             ),
           const SectionHeader(title: 'Prueba las indicaciones'),
-          const Text(
-            'Cada aviso combina un patrón de vibración distinto con una frase hablada, para guiarte sin mirar la pantalla.',
-            style: AppTextStyles.caption,
+          const Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AppIcon(
+                AppAssets.icVibracion,
+                size: 22,
+                color: AppColors.forest,
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Cada aviso combina un patrón de vibración distinto con una frase hablada, para guiarte sin mirar la pantalla.',
+                  style: AppTextStyles.caption,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
           Wrap(
@@ -138,7 +172,7 @@ class TrailDetailScreen extends StatelessWidget {
               for (final cue in NavCue.values)
                 OutlinedButton.icon(
                   onPressed: () => _testCue(context, cue),
-                  icon: Icon(cue.icon, size: 18),
+                  icon: AppIcon(cue.iconAsset, size: 18),
                   label: Text(cue.label),
                 ),
             ],
