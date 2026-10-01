@@ -6,18 +6,21 @@ import '../../models/waypoint.dart';
 import '../theme/app_colors.dart';
 
 /// Mapa esquemático de la ruta (simulado, siempre disponible sin conexión).
-/// [currentIndex] marca la posición actual; se usa en la caminata activa.
+/// [currentIndex] marca la posición actual y [legFraction] (0 a 1) la mueve
+/// hacia el siguiente punto; el tramo recorrido se dibuja más oscuro.
 class TrailMapPreview extends StatelessWidget {
   const TrailMapPreview({
     super.key,
     required this.waypoints,
     this.currentIndex,
+    this.legFraction,
     this.height = 160,
     this.borderRadius = 16,
   });
 
   final List<Waypoint> waypoints;
   final int? currentIndex;
+  final double? legFraction;
   final double height;
   final double borderRadius;
 
@@ -28,17 +31,27 @@ class TrailMapPreview extends StatelessWidget {
       child: SizedBox(
         height: height,
         width: double.infinity,
-        child: CustomPaint(painter: _RoutePainter(waypoints, currentIndex)),
+        child: CustomPaint(
+          painter: _RoutePainter(waypoints, currentIndex, legFraction),
+        ),
       ),
     );
   }
 }
 
 class _RoutePainter extends CustomPainter {
-  _RoutePainter(this.waypoints, this.currentIndex);
+  _RoutePainter(this.waypoints, this.currentIndex, this.legFraction);
 
   final List<Waypoint> waypoints;
   final int? currentIndex;
+  final double? legFraction;
+
+  Paint _line(Color color, double width) => Paint()
+    ..color = color
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = width
+    ..strokeCap = StrokeCap.round
+    ..strokeJoin = StrokeJoin.round;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -90,29 +103,37 @@ class _RoutePainter extends CustomPainter {
         );
 
     final points = waypoints.map(project).toList();
-    final path = Path()..moveTo(points.first.dx, points.first.dy);
-    for (final p in points.skip(1)) {
-      path.lineTo(p.dx, p.dy);
+
+    // Posición actual (interpolada entre el punto actual y el siguiente).
+    final current = currentIndex;
+    Offset? pos;
+    if (current != null && current >= 0 && current < points.length) {
+      pos = points[current];
+      final f = legFraction;
+      if (f != null && current < points.length - 1) {
+        pos = points[current] +
+            (points[current + 1] - points[current]) * f.clamp(0.0, 1.0).toDouble();
+      }
     }
 
+    final full = Path()..moveTo(points.first.dx, points.first.dy);
+    for (final p in points.skip(1)) {
+      full.lineTo(p.dx, p.dy);
+    }
+    canvas.drawPath(full, _line(Colors.white, 8));
     canvas.drawPath(
-      path,
-      Paint()
-        ..color = Colors.white
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 8
-        ..strokeCap = StrokeCap.round
-        ..strokeJoin = StrokeJoin.round,
+      full,
+      _line(pos == null ? AppColors.forest : AppColors.moss, 4),
     );
-    canvas.drawPath(
-      path,
-      Paint()
-        ..color = AppColors.forest
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 4
-        ..strokeCap = StrokeCap.round
-        ..strokeJoin = StrokeJoin.round,
-    );
+
+    if (pos != null && current != null) {
+      final covered = Path()..moveTo(points.first.dx, points.first.dy);
+      for (var i = 1; i <= current; i++) {
+        covered.lineTo(points[i].dx, points[i].dy);
+      }
+      covered.lineTo(pos.dx, pos.dy);
+      canvas.drawPath(covered, _line(AppColors.forest, 4));
+    }
 
     final border = Paint()..color = Colors.white;
     for (var i = 0; i < points.length; i++) {
@@ -128,16 +149,11 @@ class _RoutePainter extends CustomPainter {
       canvas.drawCircle(points[i], radius, Paint()..color = fill);
     }
 
-    final current = currentIndex;
-    if (current != null && current >= 0 && current < points.length) {
+    if (pos != null) {
+      canvas.drawCircle(pos, 16, Paint()..color = AppColors.river.withAlpha(70));
+      canvas.drawCircle(pos, 7, Paint()..color = AppColors.river);
       canvas.drawCircle(
-        points[current],
-        16,
-        Paint()..color = AppColors.river.withAlpha(70),
-      );
-      canvas.drawCircle(points[current], 7, Paint()..color = AppColors.river);
-      canvas.drawCircle(
-        points[current],
+        pos,
         7,
         Paint()
           ..color = Colors.white
@@ -149,5 +165,7 @@ class _RoutePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _RoutePainter old) =>
-      old.waypoints != waypoints || old.currentIndex != currentIndex;
+      old.waypoints != waypoints ||
+      old.currentIndex != currentIndex ||
+      old.legFraction != legFraction;
 }

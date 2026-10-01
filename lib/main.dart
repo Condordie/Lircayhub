@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'core/services/app_settings.dart';
 import 'core/services/haptic_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/services/voice_service.dart';
-import 'ui/screens/home_screen.dart';
+import 'ui/screens/main_shell.dart';
 import 'ui/theme/app_theme.dart';
 
 void main() {
@@ -26,12 +27,19 @@ class LircayHubApp extends StatelessWidget {
         ChangeNotifierProvider<NotificationService>(
           create: (_) => NotificationService(),
         ),
+        ChangeNotifierProvider<AppSettings>(
+          create: (ctx) => AppSettings(
+            haptic: ctx.read<HapticService>(),
+            voice: ctx.read<VoiceService>(),
+            notifications: ctx.read<NotificationService>(),
+          ),
+        ),
       ],
       child: MaterialApp(
         title: 'Lircay Trail',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
-        home: const HomeScreen(),
+        home: const MainShell(),
       ),
     );
   }

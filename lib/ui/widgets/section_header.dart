@@ -15,7 +15,7 @@ class SectionHeader extends StatelessWidget {
       child: Row(
         children: [
           Expanded(child: Text(title, style: AppTextStyles.title)),
-          if (trailing != null) trailing!,
+          ?trailing,
         ],
       ),
     );

@@ -12,6 +12,7 @@ import '../widgets/difficulty_chip.dart';
 import '../widgets/section_header.dart';
 import '../widgets/stat_tile.dart';
 import '../widgets/trail_map_preview.dart';
+import 'active_hike_screen.dart';
 
 class TrailDetailScreen extends StatelessWidget {
   const TrailDetailScreen({super.key, required this.trail});
@@ -32,13 +33,9 @@ class TrailDetailScreen extends StatelessWidget {
   }
 
   void _startHike(BuildContext context) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(
-          content: Text('La caminata activa se conecta en la fase 3'),
-        ),
-      );
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => ActiveHikeScreen(trail: trail)),
+    );
   }
 
   @override
