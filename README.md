@@ -10,7 +10,7 @@ Esto es una maqueta, no la app terminada. Me concentré en el flujo principal: *
 
 | Lista de senderos | Detalle del sendero | Caminata activa |
 |---|---|---|
-| ![Lista de senderos](assets/capturas/cap1.png.png) | ![Detalle](assets/capturas/cap2.png) | ![Caminata activa](assets/capturas/cap3.png) |
+| ![Lista de senderos](assets/capturas/cap1.png) | ![Detalle](assets/capturas/cap2.png) | ![Caminata activa](assets/capturas/cap3.png) |
 
 | SOS enviado | Aviso de caída | Resumen |
 |---|---|---|
