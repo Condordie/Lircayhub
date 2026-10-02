@@ -306,7 +306,7 @@ class MockData {
     EmergencyContact(
       name: 'Christian Cabrera',
       phone: '+56 9 1234 5678',
-      relationship: 'Hermana',
+      relationship: 'Hermano',
     ),
     EmergencyContact(
       name: 'John Doe',

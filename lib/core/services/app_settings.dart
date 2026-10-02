@@ -7,7 +7,7 @@ import 'haptic_service.dart';
 import 'notification_service.dart';
 import 'voice_service.dart';
 
-/// Ajustes y datos de seguridad del usuario (en memoria, sin base de datos).
+/// Ajustes y datos de seguridad del usuario.
 class AppSettings extends ChangeNotifier {
   AppSettings({
     required this._haptic,

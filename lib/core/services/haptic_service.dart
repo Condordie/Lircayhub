@@ -3,7 +3,7 @@ import 'package:vibration/vibration.dart';
 
 import '../enums/haptic_pattern.dart';
 
-/// Vibración real del teléfono. No requiere conexión.
+/// Vibración del teléfono. No requiere conexión.
 class HapticService {
   bool enabled = true;
 
