@@ -120,7 +120,7 @@ class TrailDetailScreen extends StatelessWidget {
             ),
           ],
           const SectionHeader(title: 'Mapa del recorrido'),
-          TrailMap(waypoints: trail.waypoints, height: 220),
+          TrailMap(waypoints: trail.waypoints, height: 220, expandable: true),
           const SizedBox(height: 8),
           const OfflineMapDownloadTile(),
           const SizedBox(height: 6),

@@ -79,6 +79,9 @@ class OfflineMapService {
     }
   }
 
+  /// Cancela una descarga en curso (p. ej. por falta de internet).
+  Future<void> cancelDownload() => store.download.cancel();
+
   Future<int> cachedTiles() => store.stats.length;
 
   /// Tamaño en KiB.

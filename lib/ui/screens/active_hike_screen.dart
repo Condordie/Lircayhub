@@ -143,6 +143,7 @@ class _ActiveHikeView extends StatelessWidget {
                       currentIndex: vm.currentIndex,
                       legFraction: vm.legFraction,
                       height: 210,
+                      expandable: true,
                     ),
                     const SizedBox(height: 6),
                     Text(

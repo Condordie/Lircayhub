@@ -20,6 +20,8 @@ class TrailMap extends StatelessWidget {
     this.height = 160,
     this.borderRadius = 16,
     this.interactive = false,
+    this.expandable = false,
+    this.title = 'Mapa del recorrido',
   });
 
   final List<Waypoint> waypoints;
@@ -30,6 +32,10 @@ class TrailMap extends StatelessWidget {
 
   /// false: el mapa no captura gestos (no pelea con el scroll de la lista).
   final bool interactive;
+
+  /// true: un toque abre el mapa a pantalla completa con zoom y arrastre.
+  final bool expandable;
+  final String title;
 
   LatLng? _currentPosition(List<LatLng> pts) {
     final i = currentIndex;
@@ -80,7 +86,7 @@ class TrailMap extends StatelessWidget {
       if (pos != null) pos,
     ];
 
-    return ClipRRect(
+    final map = ClipRRect(
       borderRadius: BorderRadius.circular(borderRadius),
       child: SizedBox(
         height: height,
@@ -127,6 +133,70 @@ class TrailMap extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+
+    if (!expandable) return map;
+
+    return GestureDetector(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => _TrailMapFullScreen(
+            title: title,
+            waypoints: waypoints,
+            currentIndex: currentIndex,
+            legFraction: legFraction,
+          ),
+        ),
+      ),
+      child: Stack(
+        children: [
+          map,
+          Positioned(
+            top: 8,
+            right: 8,
+            child: DecoratedBox(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              child: const Padding(
+                padding: EdgeInsets.all(6),
+                child: Icon(Icons.fullscreen, size: 22),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Pantalla completa: pellizcar, doble toque y arrastrar.
+class _TrailMapFullScreen extends StatelessWidget {
+  const _TrailMapFullScreen({
+    required this.title,
+    required this.waypoints,
+    this.currentIndex,
+    this.legFraction,
+  });
+
+  final String title;
+  final List<Waypoint> waypoints;
+  final int? currentIndex;
+  final double? legFraction;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: TrailMap(
+        waypoints: waypoints,
+        currentIndex: currentIndex,
+        legFraction: legFraction,
+        height: double.infinity,
+        borderRadius: 0,
+        interactive: true,
       ),
     );
   }

@@ -48,14 +48,29 @@ class _OfflineMapDownloadTileState extends State<OfflineMapDownloadTile> {
       _status = 'Descargando mapa...';
     });
     try {
-      await for (final pct in _service.downloadRegion()) {
+      final total = await _service.countTiles();
+      // Con señal pero SIN internet las peticiones se quedan colgadas: si no
+      // llega ningún avance en 30 s se cancela en vez de esperar sin fin.
+      await for (final pct in _service.downloadRegion().timeout(
+            const Duration(seconds: 30),
+          )) {
         if (!mounted) return;
         setState(() => _progress = pct / 100);
       }
-      await _refresh();
+      // FMTC termina "bien" aunque fallen teselas: se verifica el resultado.
+      final saved = await _service.cachedTiles();
+      if (!mounted) return;
+      if (saved < total) {
+        setState(() => _status =
+            'Descarga incompleta ($saved de $total teselas). Revisa tu conexión e inténtalo de nuevo.');
+      } else {
+        await _refresh();
+      }
     } catch (e) {
+      await _service.cancelDownload();
       if (mounted) {
-        setState(() => _status = 'No se pudo descargar (¿sin conexión?): $e');
+        setState(() => _status =
+            'No se pudo descargar (sin internet o tiempo agotado): $e');
       }
     } finally {
       if (mounted) {
