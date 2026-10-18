@@ -33,8 +33,6 @@ class OfflineMapService {
     }
   }
 
-  /// Capa de teselas. Con [offlineOnly] = true NUNCA usa red: solo lo que
-  /// esté guardado en disco (así se demuestra el modo offline).
   TileLayer tileLayer({required bool offlineOnly}) => TileLayer(
         urlTemplate: urlTemplate,
         userAgentPackageName: userAgent,

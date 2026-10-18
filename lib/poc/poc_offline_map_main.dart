@@ -5,7 +5,6 @@ import 'package:latlong2/latlong.dart';
 import '../core/data/mock_data.dart';
 import 'package:lircayhub/core/services/offline_map_service.dart';
 
-/// Entry point SOLO de la PoC (no modifica lib/main.dart):
 ///   flutter run -t lib/poc/poc_offline_map_main.dart
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
