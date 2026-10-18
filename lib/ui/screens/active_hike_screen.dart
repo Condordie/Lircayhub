@@ -15,7 +15,7 @@ import '../widgets/hike_control_bar.dart';
 import '../widgets/nav_cue_banner.dart';
 import '../widgets/sos_button.dart';
 import '../widgets/stat_tile.dart';
-import '../widgets/trail_map_preview.dart';
+import '../widgets/trail_map.dart';
 import '../widgets/voice_button.dart';
 import 'hike_summary_screen.dart';
 
@@ -138,7 +138,7 @@ class _ActiveHikeView extends StatelessWidget {
                           : 'Próximo: ${next.name}',
                     ),
                     const SizedBox(height: 14),
-                    TrailMapPreview(
+                    TrailMap(
                       waypoints: vm.trail.waypoints,
                       currentIndex: vm.currentIndex,
                       legFraction: vm.legFraction,

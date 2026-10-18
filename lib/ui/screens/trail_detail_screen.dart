@@ -15,7 +15,8 @@ import '../widgets/difficulty_chip.dart';
 import '../widgets/section_header.dart';
 import '../widgets/stat_tile.dart';
 import '../widgets/trail_image.dart';
-import '../widgets/trail_map_preview.dart';
+import '../widgets/offline_map_download_tile.dart';
+import '../widgets/trail_map.dart';
 import 'active_hike_screen.dart';
 
 class TrailDetailScreen extends StatelessWidget {
@@ -118,11 +119,13 @@ class TrailDetailScreen extends StatelessWidget {
               ],
             ),
           ],
-          const SectionHeader(title: 'Recorrido esquemático'),
-          TrailMapPreview(waypoints: trail.waypoints, height: 200),
+          const SectionHeader(title: 'Mapa del recorrido'),
+          TrailMap(waypoints: trail.waypoints, height: 220),
+          const SizedBox(height: 8),
+          const OfflineMapDownloadTile(),
           const SizedBox(height: 6),
           const Text(
-            'Esquema ilustrativo del trayecto, no es un mapa GPS.',
+            'Trazado ilustrativo sobre el mapa real; no es un track GPS.',
             style: AppTextStyles.caption,
           ),
           const SectionHeader(title: 'Puntos del recorrido'),
