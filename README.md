@@ -1,10 +1,17 @@
 # Lircay Trail
 
-> Maqueta funcional para **LircayHub** · Producto de Software 1 · Programación de Dispositivos Móviles 2026-02 · Universidad de Talca
+> Prototipo funcional para **LircayHub** · Producto de Software 2 · Programación de Dispositivos Móviles 2026-02 · Universidad de Talca
 
 Lircay Trail es una app de senderismo pensada para la Reserva Nacional Altos de Lircay (Región del Maule). Te acompaña mientras caminas: te avisa por **vibración** y por **voz** cuándo doblar, la puedes controlar hablándole, te manda avisos importantes y tiene un botón **SOS** para pedir ayuda. Todo está pensado para funcionar **sin conexión**, porque en la montaña no se puede contar con señal.
 
-Esto es una maqueta, no la app terminada. Me concentré en el flujo principal: **elegir un sendero → ver su detalle → salir a caminar con la guía activa**.
+En el PDS1 entregué una maqueta. En el PDS2 la convertí en un **prototipo funcional**. Esto fue lo que hice:
+
+- Reorganicé la app con arquitectura **MVVM** e inyección de dependencias (Provider).
+- Integré el riesgo técnico de la PoC (**mapa sin conexión**) en una capa de servicios.
+- Agregué **persistencia** de ajustes, contactos e historial de caminatas.
+- Conecté la app con el sistema operativo mediante el selector nativo de compartir (**interoperabilidad**).
+- Construí un módulo de **Beta Testing** dentro de la app, con un instrumento en JSON.
+- Definí la identidad nativa del paquete (`cl.lircayhub.lircaytrail`, ícono y splash).
 
 ## Capturas
 
@@ -14,58 +21,59 @@ Esto es una maqueta, no la app terminada. Me concentré en el flujo principal: *
 
 | SOS enviado | Aviso de caída | Resumen |
 |---|---|---|
-| ![SOS](assets/capturas/cap4.png) | ![Caída](assets/capturas/cap5.png) | ![Resumen](assets/capturas/cap5.png) |
+| ![SOS](assets/capturas/cap4.png) | ![Caída](assets/capturas/cap5.png) | ![Resumen](assets/capturas/cap6.png) |
+
+| Historial | Evaluación (Beta) | Mapa sin conexión |
+|---|---|---|
+| ![Historial](assets/capturas/cap7.png) | ![Evaluación](assets/capturas/cap8.png) | ![Mapa offline](assets/capturas/cap9.png) |
+
 
 ## Índice
 
-1. [Definición del producto y paradigma](#1-definición-del-producto-y-paradigma)
+1. [Definición del producto](#1-definición-del-producto)
 2. [Especificación de requerimientos](#2-especificación-de-requerimientos)
-3. [Arquitectura y jerarquía de navegación](#3-arquitectura-y-jerarquía-de-navegación)
-4. [Despliegue y material de apoyo](#4-despliegue-y-material-de-apoyo)
-5. [Pendientes y limitaciones conocidas](#5-pendientes-y-limitaciones-conocidas)
+3. [Arquitectura: MVVM e inyección de dependencias](#3-arquitectura-mvvm-e-inyección-de-dependencias)
+4. [ADR de la PoC: mapa sin conexión](#4-adr-de-la-poc-mapa-sin-conexión)
+5. [Persistencia de datos](#5-persistencia-de-datos)
+6. [Beta Testing y reporte de QA](#6-beta-testing-y-reporte-de-qa)
+7. [Despliegue y APK](#7-despliegue-y-apk)
+8. [Material de apoyo](#8-material-de-apoyo)
+9. [Deuda técnica y trabajos futuros](#9-deuda-técnica-y-trabajos-futuros)
 
 ---
 
-## 1. Definición del producto y paradigma
+## 1. Definición del producto
 
 ### El problema
 
-Altos de Lircay es la mayor área protegida de la región, con unas 16.700 hectáreas, y recibe visitantes todo el año. Las caminatas son largas: el Mirador del Venado ronda los 11,7 km y el Enladrillado unos 12 km. En ese terreno se juntan tres cosas que complican todo. Primero, no se puede asumir que haya señal. Segundo, uno camina con bastones, guantes o mochila y casi nunca tiene una mano libre para el celular, así que mirar la pantalla a cada rato es incómodo y hasta riesgoso. Tercero, si algo sale mal (una torcedura, una caída, perderse en una bifurcación) la ayuda queda lejos. Las apps de mapas normales exigen mirar la pantalla todo el tiempo, dependen de internet y no están pensadas para avisarle a alguien si te pasa algo.
+Altos de Lircay es la mayor área protegida de la región, con unas 16.700 hectáreas, y recibe visitantes todo el año. Las caminatas son largas: el Mirador del Venado ronda los 11,7 km y el Enladrillado unos 12 km. En ese terreno se juntan tres cosas que complican todo. Primero, no se puede asumir que haya señal. Segundo, uno camina con bastones, guantes o mochila y casi nunca tiene una mano libre para el celular. Tercero, si algo sale mal (una torcedura, una caída, perderse en una bifurcación) la ayuda queda lejos. Las apps de mapas normales exigen mirar la pantalla todo el tiempo, dependen de internet y no avisan a nadie si te pasa algo.
 
 ### La solución
 
-Lircay Trail resuelve eso con una guía que se **siente y se escucha** en vez de solo verse. Cada indicación (seguir recto, girar a la izquierda, girar a la derecha, te saliste del sendero, llegaste) tiene su propio patrón de vibración y su propia frase hablada, así que puedes ir con el teléfono en el bolsillo y saber qué hacer. Además puedes pedirle cosas por voz ("¿cuánto falta?", "pausa", "auxilio"), recibes avisos de clima o de hora límite de regreso, y si necesitas ayuda mantienes presionado el botón SOS para avisar a tus contactos con tu ubicación. Si la app detecta una posible caída te pregunta si estás bien y, si no respondes en 10 segundos, envía la alerta sola.
+Lircay Trail resuelve eso con una guía que se **siente y se escucha** en vez de solo verse. Cada indicación (seguir recto, girar a la izquierda, girar a la derecha, te saliste del sendero, llegaste) tiene su propio patrón de vibración y su propia frase hablada. Además puedes pedirle cosas por voz ("¿cuánto falta?", "pausa", "auxilio"), recibes avisos de clima o de hora límite de regreso, y si necesitas ayuda mantienes presionado el botón SOS. Si la app detecta una posible caída te pregunta si estás bien y, si no respondes en 10 segundos, envía la alerta sola.
 
 ### Por qué tiene que ser una app móvil
 
-Un computador no sube al cerro. El problema ocurre en terreno, de pie, caminando, y justamente ahí es donde el teléfono aporta lo que un software de escritorio no puede: va en el bolsillo, tiene motor de vibración, micrófono, parlante, sensores y notificaciones. Si le quitas esas capacidades, la idea completa pierde sentido, porque lo que la hace útil es poder guiarte sin que mires la pantalla.
+El problema ocurre en terreno, de pie, caminando, y ahí el teléfono aporta lo que un computador no puede: va en el bolsillo, tiene motor de vibración, micrófono, parlante, sensores y notificaciones.
 
-| Capacidad del celular | Para qué la uso | Estado en la maqueta |
+| Capacidad del celular | Para qué la uso | Estado en el prototipo |
 |---|---|---|
 | Vibración | Indicaciones de giro que se sienten sin mirar | Real |
 | Parlante (texto a voz) | Frases como "gira a la izquierda en la bifurcación" | Real |
 | Micrófono (voz a texto) | Comandos manos libres | Real |
+| Mapa con caché local | Ver el mapa de la zona sin señal | Real (servicio de la PoC) |
+| Selector nativo de compartir | Enviar la evaluación Beta por correo u otra app | Real |
 | Notificaciones | Avisos de clima, camping y hora límite | Simulado dentro de la app |
 | Acelerómetro | Detectar una caída | Simulado desde el menú de demo |
-| GPS | Compartir la ubicación en el SOS y moverse por el mapa | Simulado |
+| GPS y envío de alertas | Ubicación del SOS y envío a contactos | Simulado |
 
 ### Por qué Flutter
 
-Elegí Flutter porque con un solo código puedo apuntar a Android e iOS, porque el hot reload acelera mucho el ciclo de probar y corregir, y porque todo es un widget: eso calza justo con lo que pide, que es componer jerarquías de widgets reutilizables (por ejemplo, `TrailCard` y `StatTile` se usan en más de una pantalla). Además existen plugins maduros para lo que necesito (`vibration`, `flutter_tts`, `speech_to_text`), así que la parte de hardware no me obligó a escribir código nativo.
-
-| Alternativa | Por qué no la elegí |
-|---|---|
-| Nativo (Kotlin + Swift) | Habría que hacer y mantener dos apps; demasiado para una maqueta |
-| React Native | Es válido, pero no lo domino tanto y el curso se enfoca en Flutter |
-| Web / PWA | El acceso a vibración y sensores es limitado según el navegador, y el trabajo sin conexión es más frágil |
-
-### Cómo encaja con "Workspace Mobile Firsts"
-
-Aquí el flujo crítico es la **seguridad en terreno**, que por definición no ocurre frente a un computador. La misma lógica se podría extender a guías y operadores turísticos que cuidan grupos, pero la maqueta se queda en el caso de una persona caminando.
+Elegí Flutter porque con un solo código puedo apuntar a Android e iOS, porque el hot reload me permitió iterar rápido, y porque la composición por widgets me sirvió para reutilizar piezas. Además existen plugins maduros para el hardware que necesito (`vibration`, `flutter_tts`, `speech_to_text`).
 
 ### Qué es real y qué es simulado
 
-Para una maqueta es importante ser claro con esto. Lo que depende del hardware del teléfono es real: la vibración, la voz que habla y el reconocimiento de comandos. Lo que dependería de infraestructura (GPS, envío de alertas, mapas, clima) lo simulo asumiendo el mejor escenario: mapas siempre disponibles, GPS exacto, alertas que siempre se entregan. El recorrido de la caminata es una demo acelerada: cada tramo dura 8 segundos reales y el menú de demo (ícono del matraz) permite provocar un desvío, una caída, un aviso de clima o la hora límite.
+Lo que depende del hardware del teléfono y validé en la PoC o en el PDS1 es real: vibración, voz, reconocimiento de comandos, caché del mapa, persistencia y compartir. Lo que dependería de infraestructura (GPS, envío real del SOS, clima) lo sigo simulando. El recorrido es una demo acelerada: cada tramo dura 8 segundos reales y el menú de demo (ícono del matraz) permite provocar un desvío, una caída, un aviso de clima o la hora límite.
 
 ---
 
@@ -85,232 +93,394 @@ El rol principal es el **senderista**.
 - **HU-08.** Como senderista, quiero recibir avisos de clima, camping y hora límite de regreso, para planificar mi vuelta con seguridad.
 - **HU-09.** Como senderista, quiero ver un resumen al terminar la caminata, para revisar cuánto recorrí y si hubo alguna alerta.
 
-### Matriz de requerimientos
-
-**Requerimientos funcionales**
+### Requerimientos funcionales
 
 | ID | Requerimiento | Historia | Dónde se ve en el código |
 |---|---|---|---|
-| RF-01 | Listar senderos con foto, dificultad, distancia, desnivel y duración | HU-01 | `home_screen.dart`, `trail_card.dart` |
-| RF-02 | Navegar de la lista al detalle del sendero seleccionado, pasando el objeto `Trail` | HU-02 | `home_screen.dart`, `trail_detail_screen.dart` |
-| RF-03 | Mostrar en el detalle la descripción, los puntos del recorrido y un esquema del trayecto | HU-02 | `trail_detail_screen.dart`, `trail_map_preview.dart` |
-| RF-04 | Probar cada indicación (vibración y voz) antes de salir | HU-03 | `trail_detail_screen.dart`, `haptic_service.dart`, `voice_service.dart` |
+| RF-01 | Listar senderos con foto, dificultad, distancia, desnivel y duración | HU-01 | `home_screen.dart`, `home_view_model.dart`, `trail_card.dart` |
+| RF-02 | Navegar de la lista al detalle del sendero seleccionado | HU-02 | `home_screen.dart`, `trail_detail_screen.dart` |
+| RF-03 | Mostrar descripción, puntos del recorrido y esquema del trayecto | HU-02 | `trail_detail_screen.dart`, `trail_map_preview.dart` |
+| RF-04 | Probar cada indicación (vibración y voz) antes de salir | HU-03 | `haptic_service.dart`, `voice_service.dart` |
 | RF-05 | Iniciar una caminata simulada que avanza punto a punto | HU-04 | `active_hike_view_model.dart` |
-| RF-06 | Disparar en cada punto la indicación (texto, vibración y voz) | HU-04 | `nav_cue.dart`, `haptic_pattern.dart`, `nav_cue_banner.dart` |
-| RF-07 | SOS por presión sostenida de 2 segundos, con confirmación de los contactos notificados | HU-05 | `sos_button.dart`, `active_hike_screen.dart` |
-| RF-08 | Detección de caída (simulada) con cuenta regresiva de 10 segundos | HU-06 | `active_hike_view_model.dart`, `active_hike_screen.dart` |
+| RF-06 | Disparar en cada punto la indicación (texto, vibración y voz) | HU-04 | `nav_cue.dart`, `nav_cue_banner.dart` |
+| RF-07 | SOS por presión sostenida de 2 segundos | HU-05 | `sos_button.dart`, `active_hike_screen.dart` |
+| RF-08 | Detección de caída (simulada) con cuenta regresiva de 10 segundos | HU-06 | `active_hike_view_model.dart` |
 | RF-09 | Comandos de voz: cuánto falta, dónde estoy, repite, pausa, continuar, terminar y auxilio | HU-07 | `voice_service.dart`, `active_hike_view_model.dart` |
 | RF-10 | Mostrar avisos de clima, camping y hora límite, con vibración | HU-08 | `notification_service.dart`, `alert_tile.dart` |
 | RF-11 | Pausar, reanudar y terminar la caminata, y mostrar un resumen | HU-09 | `hike_control_bar.dart`, `hike_summary_screen.dart` |
-| RF-12 | Administrar contactos de emergencia y hora límite de regreso | HU-05, HU-08 | `safety_screen.dart`, `app_settings.dart` |
-| RF-13 | Activar o desactivar vibración, voz y notificaciones | HU-03 | `settings_screen.dart`, `app_settings.dart` |
+| RF-12 | Administrar contactos de emergencia y hora límite de regreso | HU-05, HU-08 | `safety_screen.dart`, `safety_view_model.dart` |
+| RF-13 | Activar o desactivar vibración, voz y notificaciones | HU-03 | `settings_screen.dart`, `settings_view_model.dart` |
+| RF-14 | Mapa con descarga de zonas y lectura sin conexión | HU-02, HU-04 | `offline_map_service.dart`, `offline_map_download_tile.dart` |
+| RF-15 | Guardar cada caminata terminada y mostrar el historial | HU-09 | `hike_history_repository.dart`, `history_view_model.dart` |
+| RF-16 | Evaluación Beta dentro de la app a partir de un JSON, con envío por el selector de compartir | (QA) | `qa_instrument.json`, `qa_view_model.dart`, `share_service.dart` |
 
-**Requerimientos no funcionales**
+### Requerimientos no funcionales
 
 | ID | Requerimiento | Cómo se cumple |
 |---|---|---|
-| RNF-01 | Funcionar sin conexión | No hay red ni base de datos; todo sale de datos locales en `mock_data.dart` |
-| RNF-02 | Arquitectura modular, con la interfaz separada de la lógica | Carpetas `core`, `models` y `ui`; la lógica de la caminata vive en un ViewModel |
+| RNF-01 | Funcionar sin conexión | Datos de senderos locales, caché de teselas con FMTC y persistencia local |
+| RNF-02 | Arquitectura desacoplada | MVVM: las vistas solo dibujan y los ViewModels consumen repositorios y servicios |
 | RNF-03 | Identidad visual centralizada | `ThemeData` global, `AppColors`, `AppTextStyles` y tipografía Nunito |
 | RNF-04 | Lista eficiente | `SliverList.builder` y fotos con `cacheWidth` limitado |
-| RNF-05 | Usable en terreno | Botones de 76 px y acciones críticas con presión sostenida para evitar toques accidentales |
+| RNF-05 | Usable en terreno | Botones grandes y acciones críticas con presión sostenida |
 | RNF-06 | Respaldo no visual | Cada indicación importante llega también por vibración y por voz |
-| RNF-07 | Accesibilidad básica | Etiquetas semánticas en las fotos (`semanticLabel`) |
-| RNF-08 | Mantenibilidad | Rutas de assets en `AppAssets` y datos de ejemplo en un solo archivo |
-| RNF-09 | Plataforma | Pensada para Android; iOS no se ha probado |
-| RNF-10 | Control de versiones | Git con `.gitignore` y commits pequeños por pieza |
+| RNF-07 | Robustez ante fallos del entorno | Cada servicio captura errores (permisos denegados, sin red, almacenamiento) y degrada sin cerrar la app |
+| RNF-08 | Persistencia entre sesiones | Ajustes, contactos, historial y evaluaciones sobreviven al reinicio de la app |
+| RNF-09 | Plataforma | Android (iOS no probado) |
+| RNF-10 | Control de versiones | Git con `.gitignore`, ramas `feature/*` y APK publicado en GitHub Releases |
 
 ---
 
-## 3. Arquitectura y jerarquía de navegación
+## 3. Arquitectura: MVVM e inyección de dependencias
 
 ### Estructura de carpetas
 
 ```
 lib/
-├── main.dart                      # arranque, providers y tema
-├── core/                          # lo que no es pantalla
-│   ├── constants/
-│   │   └── app_assets.dart        # rutas de imágenes e íconos
+├── main.dart                      # arranque, composición de dependencias y providers
+├── core/
+│   ├── constants/                 # rutas de assets
 │   ├── data/
-│   │   └── mock_data.dart         # senderos, contactos y avisos
+│   │   └── mock_data.dart         # senderos de ejemplo (fuente de TrailRepository)
 │   ├── enums/                     # dificultad, indicación, vibración, estado, tipo de aviso
-│   ├── services/                  # vibración, voz, avisos y ajustes
+│   ├── repositories/              # acceso a datos (abstracción + implementación)
+│   │   ├── trail_repository.dart  # abstracto + MockTrailRepository
+│   │   ├── settings_repository.dart
+│   │   ├── hike_history_repository.dart
+│   │   └── qa_repository.dart
+│   ├── services/                  # hardware y sistema operativo
+│   │   ├── haptic_service.dart
+│   │   ├── voice_service.dart
+│   │   ├── notification_service.dart
+│   │   ├── offline_map_service.dart   # servicio de la PoC
+│   │   └── share_service.dart         # Intent nativo (share_plus)
 │   └── utils/
-│       └── formatters.dart        # formato de km y tiempo
-├── models/                        # clases de datos: Trail, Waypoint, HikeSession...
-└── ui/                            # todo lo que se dibuja
-    ├── screens/                   # una pantalla por archivo
-    ├── theme/                     # colores, estilos de texto y ThemeData
-    ├── viewmodels/
-    │   └── active_hike_view_model.dart
-    └── widgets/                   # piezas reutilizables
+├── models/                        # Trail, Waypoint, HikeSession, HikeRecord, UserSettings, QaInstrument...
+└── ui/
+    ├── screens/                   # Views: solo dibujan y delegan
+    ├── viewmodels/                # ChangeNotifier con la lógica de presentación
+    ├── widgets/
+    └── theme/
 
 assets/
-├── font/      # Nunito (variable)
-├── icons/     # 14 íconos SVG
-└── images/    # 7 fotos
+├── font/   icons/   images/
+└── qa/qa_instrument.json          # instrumento de evaluación Beta
 ```
 
-Separé el código en tres capas simples. En `core` va lo que no es una pantalla (enums, servicios, datos y constantes), en `models` van las clases que representan la información (un `Trail`, un `Waypoint`, una `HikeSession`) y en `ui` va todo lo que se dibuja. La regla que me puse es que nada de `core` ni de `models` importa algo de `ui`: por ejemplo, los enums no saben nada de Material, y los íconos y colores de cada enum viven aparte en `ui/theme/enum_visuals.dart`. Así puedo cambiar el diseño sin tocar la lógica y viceversa. Como alternativa existía organizar por funcionalidad (una carpeta por feature), pero eso conviene más cuando la app tiene muchos módulos; para una maqueta con un flujo principal, las capas son más fáciles de leer y de explicar.
+La regla que me puse es que las dependencias van en una sola dirección: **View → ViewModel → Repository/Service → fuente de datos**. Ninguna View accede a un repositorio o servicio de datos, y nada de `core` ni de `models` importa algo de `ui`.
 
-### Manejo de estado: provider y MVVM
+### Diagrama MVVM
 
-Usé `provider` con el patrón MVVM. Los servicios (`HapticService`, `VoiceService`, `NotificationService`, `AppSettings`) se crean una sola vez en `main.dart` y se inyectan con `MultiProvider`. La pantalla de caminata activa tiene su propio `ActiveHikeViewModel`, que concentra el cronómetro, el avance por los puntos, el SOS, la caída y los comandos de voz, mientras que la pantalla solo dibuja lo que el ViewModel le dice. Lo elegí en vez de dejar todo con `setState` porque la caminata tiene varios timers y estados que se cruzan (pausa, caída, SOS, escuchando), y mezclar eso con los widgets hubiera sido un desorden. Soluciones como Bloc o Riverpod también servían, pero agregan bastante estructura para el tamaño de esta maqueta.
+```mermaid
+flowchart LR
+    subgraph View
+        H[HomeScreen]
+        A[ActiveHikeScreen]
+        S[SafetyScreen]
+        T[SettingsScreen]
+        HI[HistoryScreen]
+        Q[QaScreen]
+    end
+    subgraph ViewModel
+        HVM[HomeViewModel]
+        AVM[ActiveHikeViewModel]
+        SVM[SafetyViewModel]
+        TVM[SettingsViewModel]
+        HIVM[HistoryViewModel]
+        QVM[QaViewModel]
+    end
+    subgraph "Model / Data"
+        TR[TrailRepository]
+        AS[AppSettings]
+        SR[SettingsRepository]
+        HR[HikeHistoryRepository]
+        QR[QaRepository]
+        SV[Servicios: Haptic, Voice, Notifications, OfflineMap, Share]
+    end
+    H -- watch / read --> HVM
+    A --> AVM
+    S --> SVM
+    T --> TVM
+    HI --> HIVM
+    Q --> QVM
+    HVM --> TR
+    AVM --> HR
+    AVM --> SV
+    SVM --> AS
+    TVM --> AS
+    AS --> SR
+    HIVM --> HR
+    QVM --> QR
+    QVM --> SV
+    HVM -. notifyListeners .-> H
+    AVM -. notifyListeners .-> A
+```
+
+Cada View se suscribe al estado de su ViewModel con `context.watch` (o `Consumer`/`Selector` para reconstruir solo lo necesario) y le envía las acciones del usuario con `context.read`. Los ViewModels notifican con `notifyListeners()`; las Views no tienen lógica de negocio ni `setState` para estado del dominio.
+
+### Inyección de dependencias
+
+Construyo las dependencias **una sola vez** en `main()` y las expongo con `MultiProvider`. Los ViewModels las reciben por constructor, así que no conocen implementaciones concretas y puedo reemplazarlas por dobles en las pruebas.
+
+```mermaid
+flowchart TD
+    M["main(): construye y hidrata"] --> P[SharedPreferences]
+    M --> SV[Servicios]
+    P --> SRI[SharedPrefsSettingsRepository]
+    P --> HRI[SharedPrefsHikeHistoryRepository]
+    P --> QRI[AssetQaRepository]
+    SRI --> AS[AppSettings]
+    SV --> AS
+    M --> MP[MultiProvider]
+    AS --> MP
+    HRI --> MP
+    QRI --> MP
+    SV --> MP
+    MP --> VM["ChangeNotifierProvider(create: ViewModel(ctx.read...))"]
+    VM --> V[Views]
+```
 
 ```dart
-// active_hike_screen.dart: el ViewModel nace con el sendero elegido
+// main.dart: composición
+final prefs = await SharedPreferences.getInstance();
+final settings = AppSettings(
+  haptic: haptic, voice: voice, notifications: notifications,
+  repository: SharedPrefsSettingsRepository(prefs),
+);
+await settings.load(); // hidrata antes de runApp
+
+// active_hike_screen.dart: el ViewModel nace con sus dependencias
 ChangeNotifierProvider(
   create: (ctx) => ActiveHikeViewModel(
     trail: trail,
     haptic: ctx.read<HapticService>(),
     voice: ctx.read<VoiceService>(),
     notifications: ctx.read<NotificationService>(),
+    history: ctx.read<HikeHistoryRepository>(),
     settings: ctx.read<AppSettings>(),
   ),
   child: const _ActiveHikeView(),
 );
 ```
 
-### Identidad visual centralizada
-
-Los colores están en `AppColors`, los estilos de texto en `AppTextStyles` y todo se conecta en un `ThemeData` global (`app_theme.dart`) con la fuente Nunito. Las rutas de las imágenes y de los íconos están todas en `AppAssets`, de modo que ningún widget escribe un nombre de archivo a mano; si renombro una foto, cambio una sola línea. Nunito viene como fuente variable, así que cada peso (semibold, bold, extrabold) se fija con el eje `wght`, y el tema lo aplica a todos sus estilos.
-
-```dart
-// app_assets.dart
-static const String imgEnladrillado = '$_img/enladrillado.jpg';
-static const String icSos = '$_ico/ic_sos.svg';
-
-// app_text_styles.dart
-static const TextStyle title = TextStyle(
-  fontSize: 18,
-  fontWeight: FontWeight.w600,
-  fontVariations: [FontVariation('wght', 600)],
-  color: AppColors.ink,
-);
-```
-
-Los íconos SVG se dibujan con un widget propio, `AppIcon`, que los tiñe con el color del tema; así un mismo archivo sirve en distintos colores.
-
-### Datos
-
-Todo sale de `core/data/mock_data.dart`. Los seis senderos son reales de la reserva, pero no todas las cifras están verificadas todavía, y prefiero decirlo de frente:
-
-| Sendero | Estado de las cifras |
-|---|---|
-| Mirador del Venado | Verificado en Andeshandbook: 11,7 km, 686 m de desnivel, fácil, 4 a 5 horas de ida |
-| El Enladrillado | Distancia (12 km) y dificultad (moderada) verificadas; desnivel y tiempo provisorios |
-| Mirador del Río | Provisorio |
-| Cerro El Peine | Provisorio |
-| Valle del Venado | Provisorio |
-| Laguna El Alto | Provisorio |
-
-Las coordenadas de los puntos son esquemáticas: sirven para dibujar el trayecto ilustrativo y no son un track GPS real, y la pantalla de detalle lo avisa. Los avisos de ejemplo usan datos reales de las fuentes, como que el portón de Vilches Alto se cierra con candado a las 17:30 o que fuera de verano solo está habilitado el camping Antahuara.
-
 ### Jerarquía de navegación
 
 ```mermaid
 flowchart TD
-    A["MainShell (barra inferior)"] --> B["HomeScreen: lista de senderos"]
+    A["MainShell (barra inferior)"] --> B["HomeScreen: senderos"]
     A --> S["SafetyScreen: seguridad"]
+    A --> HI["HistoryScreen: historial"]
     A --> T["SettingsScreen: ajustes"]
-    B -- "push(trail)" --> C["TrailDetailScreen: detalle"]
-    C -- "push(trail)" --> D["ActiveHikeScreen: caminata"]
-    D -- "pushReplacement" --> E["HikeSummaryScreen: resumen"]
+    B -- "push(trail)" --> C["TrailDetailScreen"]
+    C -- "push(trail)" --> D["ActiveHikeScreen"]
+    D -- "pushReplacement" --> E["HikeSummaryScreen"]
     E -- "popUntil(primera ruta)" --> A
+    T -- push --> Q["QaScreen: evaluación Beta"]
 ```
-
-La navegación es una pila con el `Navigator` de Flutter, y el flujo principal va así:
-
-1. `MainShell` muestra `HomeScreen` con la lista de senderos. La barra inferior da acceso a Seguridad y Ajustes, que son pantallas de apoyo y no parte del flujo principal.
-2. Al tocar una tarjeta se hace `push` a `TrailDetailScreen`, pasándole el `Trail` elegido.
-3. Desde el detalle, "Iniciar caminata" hace `push` a `ActiveHikeScreen`, que crea su ViewModel con ese mismo `Trail`.
-4. Al terminar se usa `pushReplacement` hacia `HikeSummaryScreen`: la caminata sale de la pila, su ViewModel se destruye y con él se cancelan los timers, la voz y la vibración, así no queda nada corriendo en segundo plano.
-5. "Volver al inicio" hace `popUntil` a la primera ruta y deja la pila limpia.
-
-Para el paso de datos usé el camino más directo: el constructor. La lista le pasa el objeto completo al detalle y el detalle lo usa tal cual, sin buscarlo de nuevo. Eso garantiza que lo que se muestra corresponde exactamente a lo que se tocó. Las fotos además usan una animación `Hero` con la etiqueta `trail-image-<id>`, que conecta visualmente la tarjeta con el detalle.
-
-```dart
-// home_screen.dart: la lista pasa el objeto elegido
-onTap: () => Navigator.of(context).push(
-  MaterialPageRoute(builder: (_) => TrailDetailScreen(trail: trail)),
-),
-
-// trail_detail_screen.dart: el detalle lo recibe por constructor
-class TrailDetailScreen extends StatelessWidget {
-  const TrailDetailScreen({super.key, required this.trail});
-  final Trail trail;
-  // ...
-}
-```
-
-Usé `Navigator.push` imperativo en vez de rutas con nombre o un paquete como `go_router` porque la jerarquía es corta (cuatro niveles) y quería que cada transición se pudiera leer directamente en el widget que la dispara. Con más pantallas o enlaces profundos, `go_router` sería el siguiente paso.
 
 ---
 
-## 4. Despliegue y material de apoyo
+## 4. ADR de la PoC: mapa sin conexión
+
+**Estado:** aceptada e integrada · **Fecha de la PoC:** DP2
+
+### Contexto (riesgo evaluado)
+
+Mi app se usa en zonas donde la señal móvil es intermitente o nula. El riesgo técnico crítico que identifiqué es que un mapa estándar depende de una conexión constante para pedir teselas, lo que rompería la experiencia justo donde más se necesita.
+
+### Alternativas consideradas
+
+| Alternativa | Ventaja | Por qué no |
+|---|---|---|
+| Google Maps SDK | Familiar y completo | Requiere clave comercial y su soporte de mapas sin conexión es limitado y no controlable desde la app |
+| Teselas empaquetadas en `assets/` | Funciona siempre | Aumenta mucho el tamaño del APK y no se puede actualizar la zona |
+| **`flutter_map` + `flutter_map_tile_caching` (FMTC)** | Open source, sin claves, control de la descarga y lectura local | **Elegida** |
+
+### Decisión
+
+Adopté `flutter_map` con `flutter_map_tile_caching`, que guarda las teselas en el almacenamiento interno del teléfono mediante una base local (ObjectBox, dependencia interna de FMTC). Me permite descargar una zona con conexión y leerla después sin señal, con control total de la descarga.
+
+### Resultados de la PoC
+
+- Comprobé que es posible descargar y renderizar una zona del mapa sin conexión con un consumo bajo de memoria.
+- Verifiqué que los fallos esperables (sin red, almacenamiento lleno) se capturan como excepciones y no cierran la app.
+
+### Consecuencias e integración
+
+**No fusioné** el código descartable de la PoC a la rama principal. Lo refactoricé en una capa de servicios:
+
+- `OfflineMapService` inicializa el caché, descarga zonas y expone un estado observable. Si la inicialización falla, la app usa el mapa esquemático en lugar de cerrarse.
+- `OfflineMapDownloadTile` es una vista que solo dibuja el estado y delega la acción.
+- El servicio se crea en `main()` y se inyecta con Provider, como el resto de las dependencias.
+
+```mermaid
+flowchart LR
+    V[TrailMap / OfflineMapDownloadTile] --> S[OfflineMapService]
+    S --> F[FMTC]
+    F --> D[(Caché local de teselas)]
+    S -. error o sin almacenamiento .-> FB[Mapa esquemático]
+```
+
+**Pendiente que asumo:** el reconocimiento de voz de varios teléfonos necesita internet, lo que contradice la idea de funcionar sin señal. Los chips de comandos de la pantalla son el respaldo.
+
+---
+
+## 5. Persistencia de datos
+
+| Dato | Mecanismo | Repositorio | Cuándo se carga |
+|---|---|---|---|
+| Ajustes (vibración, voz, notificaciones, caída, hora límite) | `shared_preferences` (JSON) | `SettingsRepository` | `settings.load()` antes de `runApp` |
+| Contactos de emergencia | `shared_preferences` (JSON, dentro de los ajustes) | `SettingsRepository` | Igual que los ajustes |
+| Historial de caminatas (últimas 50) | `shared_preferences` (lista de JSON) | `HikeHistoryRepository` | Al abrir la pestaña Historial |
+| Evaluaciones Beta enviadas (comprobante local) | `shared_preferences` (lista de JSON) | `QaRepository` | Al abrir la evaluación |
+| Zonas de mapa descargadas | Caché de FMTC | `OfflineMapService` | Al iniciar la app |
+
+Si un dato guardado está corrupto, el repositorio lo ignora y parte con valores por defecto sin cerrar la app.
+
+---
+
+## 6. Beta Testing y reporte de QA
+
+### Instrumento
+
+Diseñé `assets/qa/qa_instrument.json` con 6 preguntas en escala de 1 a 5 estrellas, que la app lee y dibuja:
+
+| Ámbito | Preguntas |
+|---|---|
+| `cumplimiento_hu` | HU-01 (iniciar caminata y seguir la guía), HU-02 (mapa sin conexión), HU-03 (contactos, SOS y caída) |
+| `usabilidad` | UX-01 (navegación y claridad), UX-02 (persistencia al reabrir), UX-03 (contenido y utilidad) |
+
+Cada evaluación también registra el **perfil** del usuario y un comentario opcional. Al enviar, la app guarda un comprobante local y abre el **selector nativo de compartir** con un reporte legible y el mismo contenido en JSON, que guardo como evidencia.
+
+### Muestra
+
+| Perfil | Requerido | Evaluaciones recibidas |
+|---|---|---|
+| Participantes de Workspace Mobile Firsts | 4 | `2` |
+| Conocedores de la industria | 3 | `3` |
+| Externos a la industria | 3 | `3` |
+| **Total** | **10** | `8` |
+
+### Resultados
+
+> Promedio por pregunta y por perfil, calculado solo con las evaluaciones reales recibidas.
+
+| Pregunta | Promedio general |
+|---|---|
+| HU-01 | `5.00` |
+| HU-02 | `3.33` |
+| HU-03 | `5.00` |
+| UX-01 | `4.33` |
+| UX-02 | `5.00` |
+| UX-03 | `4.33` |
+
+### Qué funcionó
+
+- La facilidad para entender para qué sirve la app, la simplicidad del diseño, la persistencia entre sesiones.
+
+### Qué falló
+
+| Hallazgo | Detectado por | Estado |
+|---|---|---|
+| Las pestañas **Seguridad** e **Historial** mostraban el contenido cruzado | `Conocedor y participante` | `Pendiente` |
+| El mapa sin conexión no funcionó para un tester (HU-02 con 1/5) | Conocedor de la industria | `Pendiente` |
+| No se entiende para qué sirve la campana de la pantalla de inicio | Participante | Pendiente (ver deuda técnica) |
+
+### Trabajos futuros (deuda técnica)
+
+Ver [sección 9](#9-deuda-técnica-y-trabajos-futuros).
+
+### Evidencia
+
+Los reportes enviados por los usuarios (texto y JSON) se guardan como evidencia en el Outlook`.
+
+---
+
+## 7. Despliegue y APK
 
 ### Requisitos
 
-- Flutter instalado, con Dart `^3.13` (así lo declara el `pubspec.yaml`).
+- Flutter con Dart `^3.13`.
 - Android Studio o VS Code con las extensiones de Flutter y Dart.
-- Un **teléfono Android real**, de preferencia: el emulador no vibra y el micrófono suele dar problemas.
+- Un teléfono Android real, de preferencia: el emulador no vibra y el micrófono suele dar problemas.
 
-### Pasos para correrlo
+### Ejecutar desde el código
 
 ```bash
-git clone <URL_DEL_REPOSITORIO>
-cd lircayhub
+git clone https://github.com/Condordie/Lircayhub
+cd Lircayhub
 flutter pub get
 flutter analyze
 flutter run
 ```
 
-En `android/app/src/main/AndroidManifest.xml` hacen falta los permisos de vibración y micrófono, y la consulta de los servicios de voz (Android 11 o superior):
+### Permisos en `AndroidManifest.xml`
 
 ```xml
+<uses-permission android:name="android.permission.INTERNET"/>
 <uses-permission android:name="android.permission.VIBRATE"/>
 <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 <queries>
   <intent><action android:name="android.intent.action.TTS_SERVICE"/></intent>
   <intent><action android:name="android.speech.RecognitionService"/></intent>
+  <intent>
+    <action android:name="android.intent.action.SEND"/>
+    <data android:mimeType="text/plain"/>
+  </intent>
 </queries>
 ```
 
-Para generar el APK: `flutter build apk --release`. En esa versión conviene agregar también `<uses-permission android:name="android.permission.INTERNET"/>`, porque el reconocimiento de voz de muchos teléfonos lo necesita.
+### Generar el APK
+
+```bash
+flutter build apk --release
+# Resultado: build/app/outputs/flutter-apk/app-release.apk
+```
+
+### Identidad del paquete
+
+| Elemento | Valor |
+|---|---|
+| Package name (`applicationId`) | `cl.lircayhub.lircaytrail` |
+| Nombre visible | Lircay Trail |
+| Ícono y splash | Generados con `flutter_launcher_icons` y `flutter_native_splash` (`dart run flutter_launcher_icons`, `dart run flutter_native_splash:create`) |
+
+### Descarga
+
+**APK instalable:** `https://github.com/Condordie/Lircayhub/build/app/outputs/flutter-apk/app-debug.apk`
+
+Para instalarlo en Android hay que permitir la instalación desde orígenes desconocidos.
+
+### Flujo de trabajo en Git
+
+- Trabajo sobre la rama `main` y desarrollo cada funcionalidad nueva en una rama `feature/*`, que integro por Pull Request.
+- Mi `.gitignore` excluye `build/` y los binarios; publico el APK solo en **GitHub Releases**, asociado a un tag.
 
 ### Si algo falla
 
 | Síntoma | Qué revisar |
 |---|---|
-| `Unable to load asset` | Que las carpetas estén en `pubspec.yaml` y que los nombres coincidan exactamente, mayúsculas incluidas; después reiniciar la app por completo (no basta el hot reload) |
-| `flutter pub get` falla con "Duplicate mapping key" | Que `pubspec.yaml` no tenga una clave repetida, por ejemplo dos `uses-material-design` |
-| Los íconos no compilan | Que `flutter_svg` esté en `dependencies` |
+| `Unable to load asset` | Que las carpetas estén declaradas en `pubspec.yaml` y reiniciar la app por completo |
+| El mapa no carga en el APK release | Que el permiso `INTERNET` esté en el manifiesto |
+| No abre el menú de compartir | Que la consulta `SEND` esté en `<queries>` |
 | No vibra | Probar en un teléfono físico |
 | La voz no responde | Permiso de micrófono concedido y conexión a internet |
 
-### Material de apoyo
-
-- **Video de exposición técnica (5 min):** `hoy`
-- **Repositorio:** `https://github.com/Condordie/Lircayhub`
-
-### Créditos de recursos
-
-| Recurso | Autor / licencia / enlace |
-|---|---|
-| Fotos (`assets/images/`, 7 archivos) | `[completar: autor, licencia y enlace de cada foto]` |
-| Íconos (`assets/icons/`, 14 SVG) | `[confirmar origen y licencia]` (por ejemplo, Lucide con licencia ISC) |
-| Tipografía Nunito | Google Fonts, licencia SIL Open Font License |
-| Datos de senderos | Andeshandbook (Mirador del Venado y El Enladrillado) y CONAF (Reserva Nacional Altos de Lircay) |
-
 ---
 
-## 5. Pendientes y limitaciones conocidas
+## 8. Material de apoyo
 
-- Cada `Navigator.push` está escrito en el widget donde se usa; falta centralizar las rutas en un solo archivo.
-- Quedan algunos `Colors.white` y estilos de texto sueltos en widgets que conviene mover al tema.
-- Las cifras provisorias de los senderos hay que verificarlas con CONAF o Andeshandbook.
-- `ActiveHikeViewModel` (unas 370 líneas) y la pantalla de caminata activa son los archivos más largos y se podrían dividir.
-- Notificaciones del sistema, acelerómetro y GPS reales quedaron fuera de la maqueta.
-- El reconocimiento de voz suele necesitar internet, lo que choca con la idea de funcionar sin señal; los chips de comandos de la pantalla son el respaldo.
-- Seguridad y Ajustes.
+- **Video del pitch y Diapositivas del Pitch:** `https://drive.google.com/drive/folders/15wBzXl_NZ7i4znypJZMn7ZGE_AR2r0jR?usp=sharing`
+- **Repositorio:** https://github.com/Condordie/Lircayhub
+
+
+## 9. Deuda técnica y trabajos futuros
+
+- **Notificaciones, GPS, acelerómetro y envío real del SOS** siguen simulados. Me falta integrar `flutter_local_notifications`, `geolocator`, `sensors_plus` y el envío por SMS o llamada con `url_launcher`.
+- **Persistencia:** `shared_preferences` me alcanza para el volumen actual, pero un historial grande o con consultas pediría una base local (por ejemplo SQLite o Isar).
+- **Voz sin conexión:** el reconocimiento de voz suele necesitar internet; me falta evaluar un reconocimiento local.
+- **Cifras provisorias de senderos:** tengo que verificarlas con CONAF o Andeshandbook (todos los senderos salvo el Mirador del Venado y El Enladrillado).
+- **Campana de la pantalla de inicio:** no queda claro su propósito; voy a agregar una etiqueta o explicación, o a quitarla.
+- **Rutas:** quiero centralizar la navegación (por ejemplo con `go_router`).
+- **Pruebas automáticas:** todavía no escribí pruebas de widgets ni unitarias de los ViewModels; la inyección por constructor me facilita agregarlas.
+- **Archivos largos:** `ActiveHikeViewModel` y `active_hike_screen.dart` podría dividirlos.

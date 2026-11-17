@@ -46,3 +46,12 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Binarios (el APK se publica en GitHub Releases)
+*.apk
+*.aab
+
+# Firmas de la app
+*.jks
+*.keystore
+key.properties

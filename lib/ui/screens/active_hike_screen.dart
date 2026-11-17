@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import '../../core/repositories/hike_history_repository.dart';
 import '../../core/services/app_settings.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/services/notification_service.dart';
@@ -29,6 +29,7 @@ class ActiveHikeScreen extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (ctx) => ActiveHikeViewModel(
         trail: trail,
+        history: ctx.read<HikeHistoryRepository>(),
         haptic: ctx.read<HapticService>(),
         voice: ctx.read<VoiceService>(),
         notifications: ctx.read<NotificationService>(),

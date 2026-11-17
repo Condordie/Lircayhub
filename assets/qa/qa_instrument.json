@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "instrumento": "Evaluación Beta de Lircay Trail",
+  "perfiles": [
+    { "id": "participante", "nombre": "Participante de clase" },
+    { "id": "industria", "nombre": "Conocedor de la industria" },
+    { "id": "externo", "nombre": "Externo a la industria" }
+  ],
+  "cumplimiento_hu": [
+    {
+      "id": "HU-01",
+      "titulo": "¿Qué tan fácil fue iniciar una caminata y seguir la guía por vibración y voz?",
+      "min": "1 estrella: No logré iniciar o seguir la guía, o fue muy confusa.",
+      "max": "5 estrellas: Pude iniciar y seguir la guía de forma rápida e intuitiva."
+    },
+    {
+      "id": "HU-02",
+      "titulo": "¿El mapa sin conexión se descargó y se mostró correctamente, incluso sin señal?",
+      "min": "1 estrella: La descarga falló o el mapa no se vio sin conexión.",
+      "max": "5 estrellas: El mapa se descargó y funcionó sin conexión sin problemas."
+    },
+    {
+      "id": "HU-03",
+      "titulo": "¿Pudiste configurar tus contactos de emergencia y entender cómo funcionan el SOS y la alerta de caída?",
+      "min": "1 estrella: No logré configurarlos o no entendí cómo funcionan.",
+      "max": "5 estrellas: Fue claro y sentí que podría confiar en ello en un sendero."
+    }
+  ],
+  "usabilidad": [
+    {
+      "id": "UX-01",
+      "titulo": "¿Cómo calificas la navegación y la claridad visual de la aplicación?",
+      "min": "1 estrella: La interfaz es confusa, desordenada o difícil de entender.",
+      "max": "5 estrellas: La interfaz es clara, atractiva y facilita el uso."
+    },
+    {
+      "id": "UX-02",
+      "titulo": "¿Tus ajustes, contactos e historial se mantuvieron al cerrar y reabrir la app?",
+      "min": "1 estrella: Se perdieron datos o configuraciones.",
+      "max": "5 estrellas: Todo se mantuvo intacto entre sesiones."
+    },
+    {
+      "id": "UX-03",
+      "titulo": "¿El contenido y la utilidad de la app cumplieron tus expectativas?",
+      "min": "1 estrella: No fue relevante ni útil para el problema planteado.",
+      "max": "5 estrellas: Superó mis expectativas y resuelve bien la necesidad."
+    }
+  ]
+}

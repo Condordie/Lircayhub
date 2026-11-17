@@ -83,7 +83,7 @@ class TrailMap extends StatelessWidget {
     final i = currentIndex;
     final covered = <LatLng>[
       if (i != null && pos != null) ...pts.take(i + 1),
-      if (pos != null) pos,
+      ?pos,
     ];
 
     final map = ClipRRect(

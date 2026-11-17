@@ -1,4 +1,4 @@
-package com.example.lircayhub
+package cl.lircayhub.lircaytrail
 
 import io.flutter.embedding.android.FlutterActivity
 

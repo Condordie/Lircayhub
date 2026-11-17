@@ -1,5 +1,5 @@
 name: lircayhub
-description: "A new Flutter project."
+description: "Lircay Trail: guía de senderismo por vibración y voz para Altos de Lircay."
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -20,11 +20,15 @@ dependencies:
   flutter_map: ^8.3.2
   flutter_map_tile_caching: ^10.1.1
   latlong2: ^0.9.1
+  shared_preferences: ^2.5.6
+  share_plus: ^13.3.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.8
 
 flutter:
   uses-material-design: true
@@ -32,6 +36,7 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/qa/
 
   fonts:
     - family: Nunito
@@ -39,3 +44,18 @@ flutter:
         - asset: assets/font/Nunito-VariableFont_wght.ttf
         - asset: assets/font/Nunito-Italic-VariableFont_wght.ttf
           style: italic
+
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/icons/app_icon.png"
+  adaptive_icon_background: "#2F5D3A"
+  adaptive_icon_foreground: "assets/icons/app_icon.png"
+
+flutter_native_splash:
+  color: "#F5F1E8"
+  image: "assets/icons/app_icon.png"
+  android_12:
+    color: "#F5F1E8"
+    image: "assets/icons/app_icon.png"
