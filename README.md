@@ -447,7 +447,7 @@ flutter build apk --release
 
 ### Descarga
 
-**APK instalable:** `https://github.com/Condordie/Lircayhub/build/app/outputs/flutter-apk/app-debug.apk`
+**APK instalable:** `https://github.com/Condordie/Lircayhub/build\app\outputs\flutter-apk\app-release.apk`
 
 Para instalarlo en Android hay que permitir la instalación desde orígenes desconocidos.
 
