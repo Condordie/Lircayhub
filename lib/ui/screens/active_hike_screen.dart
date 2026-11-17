@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import '../../core/repositories/hike_history_repository.dart';
 import '../../core/services/app_settings.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/services/notification_service.dart';
@@ -15,7 +15,7 @@ import '../widgets/hike_control_bar.dart';
 import '../widgets/nav_cue_banner.dart';
 import '../widgets/sos_button.dart';
 import '../widgets/stat_tile.dart';
-import '../widgets/trail_map_preview.dart';
+import '../widgets/trail_map.dart';
 import '../widgets/voice_button.dart';
 import 'hike_summary_screen.dart';
 
@@ -29,6 +29,7 @@ class ActiveHikeScreen extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (ctx) => ActiveHikeViewModel(
         trail: trail,
+        history: ctx.read<HikeHistoryRepository>(),
         haptic: ctx.read<HapticService>(),
         voice: ctx.read<VoiceService>(),
         notifications: ctx.read<NotificationService>(),
@@ -138,11 +139,12 @@ class _ActiveHikeView extends StatelessWidget {
                           : 'Próximo: ${next.name}',
                     ),
                     const SizedBox(height: 14),
-                    TrailMapPreview(
+                    TrailMap(
                       waypoints: vm.trail.waypoints,
                       currentIndex: vm.currentIndex,
                       legFraction: vm.legFraction,
                       height: 210,
+                      expandable: true,
                     ),
                     const SizedBox(height: 6),
                     Text(

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'safety_screen.dart';
 import 'settings_screen.dart';
+import '../screens/history_screen.dart';
 
 /// Contenedor principal con la barra de navegación inferior.
 class MainShell extends StatefulWidget {
@@ -20,9 +21,10 @@ class _MainShellState extends State<MainShell> {
     return Scaffold(
       body: IndexedStack(
         index: _index,
-        children: const [
+        children: [
           HomeScreen(),
           SafetyScreen(),
+          HistoryScreen(),
           SettingsScreen(),
         ],
       ),
@@ -34,6 +36,11 @@ class _MainShellState extends State<MainShell> {
             icon: Icon(Icons.terrain_outlined),
             selectedIcon: Icon(Icons.terrain),
             label: 'Senderos',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.history_outlined),
+            selectedIcon: Icon(Icons.history),
+            label: 'Historial',
           ),
           NavigationDestination(
             icon: Icon(Icons.shield_outlined),

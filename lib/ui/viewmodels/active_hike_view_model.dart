@@ -6,12 +6,14 @@ import '../../core/enums/alert_type.dart';
 import '../../core/enums/haptic_pattern.dart';
 import '../../core/enums/hike_status.dart';
 import '../../core/enums/nav_cue.dart';
+import '../../core/repositories/hike_history_repository.dart';
 import '../../core/services/app_settings.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/services/notification_service.dart';
 import '../../core/services/voice_service.dart';
 import '../../core/utils/formatters.dart';
 import '../../models/emergency_contact.dart';
+import '../../models/hike_record.dart';
 import '../../models/hike_session.dart';
 import '../../models/trail.dart';
 import '../../models/trail_alert.dart';
@@ -25,6 +27,7 @@ class ActiveHikeViewModel extends ChangeNotifier {
     required this._haptic,
     required this._voice,
     required this._notifications,
+    required this._history,
     required this._settings,
   })  : _session = HikeSession(trail: trail) {
     _start();
@@ -36,6 +39,7 @@ class ActiveHikeViewModel extends ChangeNotifier {
   final HapticService _haptic;
   final VoiceService _voice;
   final NotificationService _notifications;
+  final HikeHistoryRepository _history;
   final AppSettings _settings;
 
   HikeSession _session;
@@ -54,6 +58,7 @@ class ActiveHikeViewModel extends ChangeNotifier {
   bool _fallActive = false;
   bool _isListening = false;
   bool _disposed = false;
+  bool _recordSaved = false;
   int _fallCountdown = fallSeconds;
   String? _lastMessage;
   String? _lastHeard;
@@ -148,6 +153,7 @@ class ActiveHikeViewModel extends ChangeNotifier {
     if (reachedEnd) {
       _ticker?.cancel();
       _session = _session.copyWith(status: HikeStatus.finished);
+      _saveRecord();
     }
     _say(cue.spokenText);
   }
@@ -166,7 +172,27 @@ class ActiveHikeViewModel extends ChangeNotifier {
     _ticker?.cancel();
     _offTrailTimer?.cancel();
     _session = _session.copyWith(status: HikeStatus.finished);
+    _saveRecord();
     _say('Caminata finalizada. Buen trabajo.');
+  }
+
+  /// Guarda la caminata en el historial una sola vez.
+  void _saveRecord() {
+    if (_recordSaved) return;
+    _recordSaved = true;
+    _history
+        .add(
+          HikeRecord(
+            trailId: trail.id,
+            trailName: trail.name,
+            startedAt: _session.startedAt ?? DateTime.now(),
+            elapsedSeconds: _session.elapsed.inSeconds,
+            distanceKm: distanceCoveredKm,
+            completed: completed,
+            sosSent: _sosSent,
+          ),
+        )
+        .catchError((Object e) => debugPrint('ActiveHikeVM history: $e'));
   }
 
   // ---------- Emergencias ----------

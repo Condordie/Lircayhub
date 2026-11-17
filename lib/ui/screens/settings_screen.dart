@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/services/app_settings.dart';
 import '../theme/app_text_styles.dart';
 import '../widgets/section_header.dart';
+import '../screens/qa_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -46,13 +47,26 @@ class SettingsScreen extends StatelessWidget {
               ],
             ),
           ),
+          const SectionHeader(title: 'Beta testing'),
+          Card(
+            color: Colors.white,
+            child: ListTile(
+              leading: const Icon(Icons.rate_review_outlined),
+              title: const Text('Evaluar el prototipo'),
+              subtitle: const Text('Responde 6 preguntas y envía tu opinión'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const QaScreen()),
+              ),
+            ),
+          ),
           const SectionHeader(title: 'Sobre este prototipo'),
           const Card(
             color: Colors.white,
             child: Padding(
               padding: EdgeInsets.all(16),
               child: Text(
-                'Prototipo sin conexión ni base de datos. Se asume el mejor escenario: mapas siempre disponibles, GPS exacto, avisos entregados y SOS que siempre se envía. Los botones reproducen el comportamiento esperado de la app real.',
+                'Tus ajustes, contactos y caminatas se guardan en el teléfono y se mantienen al cerrar la app. El recorrido, el GPS y el envío del SOS aún se simulan.',
                 style: AppTextStyles.body,
               ),
             ),
